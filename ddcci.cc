@@ -88,13 +88,13 @@ populateHandlesMap()
         while (EnumDisplayDevices(adapterDev.DeviceName,
                                   displayDevIndex++,
                                   &displayDev,
-                                  EDD_GET_DEVICE_INTERFACE_NAME)) {
+                                  0)) {
 
             // Check valid target
-            if (!(displayDev.StateFlags & DISPLAY_DEVICE_ATTACHED_TO_DESKTOP)
-                || displayDev.StateFlags & DISPLAY_DEVICE_MIRRORING_DRIVER) {
-                continue;
-            }
+            // if (!(displayDev.StateFlags & DISPLAY_DEVICE_ATTACHED_TO_DESKTOP))
+            // {
+            //     continue;
+            // }
 
             for (auto const& monitor : monitors) {
                 MONITORINFOEX monitorInfo;
@@ -115,8 +115,33 @@ populateHandlesMap()
 
                     // Match and store against device ID
                     if (monitorName == deviceName) {
+                        std::stringstream stateFlags;
+                        if (adapterDev.StateFlags 
+                            & DISPLAY_DEVICE_PRIMARY_DEVICE) {
+                            stateFlags << "primary ";
+                        }
+                        if (displayDev.StateFlags
+                            & DISPLAY_DEVICE_VGA_COMPATIBLE) {
+                            stateFlags << "vga ";
+                        }
+                        if (displayDev.StateFlags
+                            & DISPLAY_DEVICE_MULTI_DRIVER) {
+                            stateFlags << "multi ";
+                        }
+                        if (displayDev.StateFlags
+                            & DISPLAY_DEVICE_MIRRORING_DRIVER) {
+                            stateFlags << "mirror";
+                        }
+
+                        std::stringstream json;
+                        json << "{";
+                        json << "\"DeviceName\":" << "\"" << displayDev.DeviceName << "\"" << ",";
+                        json << "\"DeviceString\":" << "\"" << adapterDev.DeviceString << "\"" << ",";
+                        json << "\"DeviceID\":" << "\"" << displayDev.DeviceID << "\"" << ",";
+                        json << "\"MonitorName\":" << "\"" << displayDev.DeviceString << "\"" << ",";
+                        json << "\"DeviceFlags\":" << "\"" << stateFlags.str() << "\"" << "}";
                         handles.insert(
-                          { static_cast<std::string>(displayDev.DeviceID),
+                          { static_cast<std::string>(json.str()),
                             monitor.physicalHandles[i] });
 
                         break;
