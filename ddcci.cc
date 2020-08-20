@@ -5,13 +5,13 @@
 #include "PhysicalMonitorEnumerationAPI.h"
 #include "windows.h"
 #include "winuser.h"
-
+#include "json.hpp"
 #include <iostream>
 #include <map>
 #include <sstream>
 #include <vector>
 
-
+using json = nlohmann::json;
 std::map<std::string, HANDLE> handles;
 
 void
@@ -133,15 +133,15 @@ populateHandlesMap()
                             stateFlags << "mirror";
                         }
 
-                        std::stringstream json;
-                        json << "{";
-                        json << "\"DeviceName\":" << "\"" << displayDev.DeviceName << "\"" << ",";
-                        json << "\"DeviceString\":" << "\"" << adapterDev.DeviceString << "\"" << ",";
-                        json << "\"DeviceID\":" << "\"" << displayDev.DeviceID << "\"" << ",";
-                        json << "\"MonitorName\":" << "\"" << displayDev.DeviceString << "\"" << ",";
-                        json << "\"DeviceFlags\":" << "\"" << stateFlags.str() << "\"" << "}";
+                        json deviceInfo;
+                        deviceInfo["DeviceString"] = adapterDev.DeviceString;
+                        deviceInfo["DeviceName"] = displayDev.DeviceName;
+                        deviceInfo["DeviceID"] = displayDev.DeviceID;
+                        deviceInfo["MonitorName"] = displayDev.DeviceString;
+                        deviceInfo["DeviceFlags"] = stateFlags.str();
+
                         handles.insert(
-                          { static_cast<std::string>(json.str()),
+                          { static_cast<std::string>(deviceInfo.dump()),
                             monitor.physicalHandles[i] });
 
                         break;
