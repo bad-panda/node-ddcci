@@ -290,7 +290,7 @@ Init(Napi::Env env, Napi::Object exports)
 {
     exports.Set("getMonitorList",
                 Napi::Function::New(env, getMonitorList, "getMonitorList"));
-                exports.Set("getNumberAdapters",
+    exports.Set("getNumberAdapters",
                 Napi::Function::New(env, getNumberAdapters, "getNumberAdapters"));
     exports.Set("refresh", Napi::Function::New(env, refresh, "refresh"));
     exports.Set("setVCP", Napi::Function::New(env, setVCP, "setVCP"));
