@@ -10,6 +10,7 @@ module.exports = {
   , _setVCP: ddcci.setVCP
   , _refresh: ddcci.refresh
   , getMonitorList: ddcci.getMonitorList
+  , getNumberAdapters: ddcci.getNumberAdapters
 
   , getVCP: ddcci.getVCP
   , setVCP: ddcci.setVCP

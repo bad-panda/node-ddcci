@@ -6,6 +6,7 @@
 #include "windows.h"
 #include "winuser.h"
 #include "json.hpp"
+#include <set>
 #include <iostream>
 #include <map>
 #include <sstream>
@@ -13,6 +14,7 @@
 
 using json = nlohmann::json;
 std::map<std::string, HANDLE> handles;
+std::set<std::string> adapters;
 
 void
 populateHandlesMap()
@@ -80,6 +82,7 @@ populateHandlesMap()
     // Loop through adapters
     int adapterDevIndex = 0;
     while (EnumDisplayDevices(NULL, adapterDevIndex++, &adapterDev, 0)) {
+        adapters.insert(static_cast<std::string>(adapterDev.DeviceID));
         DISPLAY_DEVICE displayDev;
         displayDev.cb = sizeof(DISPLAY_DEVICE);
 
@@ -205,6 +208,15 @@ getMonitorList(const Napi::CallbackInfo& info)
     return ret;
 }
 
+Napi::Number
+getNumberAdapters(const Napi::CallbackInfo& info)
+{
+    Napi::Env env = info.Env();
+    Napi::Number ret = Napi::Number::New(env, adapters.size());
+
+    return ret;
+}
+
 
 Napi::Value
 setVCP(const Napi::CallbackInfo& info)
@@ -278,6 +290,8 @@ Init(Napi::Env env, Napi::Object exports)
 {
     exports.Set("getMonitorList",
                 Napi::Function::New(env, getMonitorList, "getMonitorList"));
+                exports.Set("getNumberAdapters",
+                Napi::Function::New(env, getNumberAdapters, "getNumberAdapters"));
     exports.Set("refresh", Napi::Function::New(env, refresh, "refresh"));
     exports.Set("setVCP", Napi::Function::New(env, setVCP, "setVCP"));
     exports.Set("getVCP", Napi::Function::New(env, getVCP, "getVCP"));
