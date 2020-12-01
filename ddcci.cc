@@ -16,8 +16,7 @@ using json = nlohmann::json;
 std::map<std::string, HANDLE> handles;
 std::set<std::string> adapters;
 
-void
-populateHandlesMap()
+void populateHandlesMap()
 {
     // Cleanup
     if (!handles.empty()) {
@@ -156,8 +155,7 @@ populateHandlesMap()
 }
 
 
-std::string
-getLastErrorString()
+std::string getLastErrorString()
 {
     DWORD errorCode = GetLastError();
     if (!errorCode) {
@@ -179,8 +177,7 @@ getLastErrorString()
     return message;
 }
 
-Napi::Value
-refresh(const Napi::CallbackInfo& info)
+Napi::Value refresh(const Napi::CallbackInfo& info)
 {
     Napi::Env env = info.Env();
 
@@ -194,10 +191,15 @@ refresh(const Napi::CallbackInfo& info)
 }
 
 
-Napi::Array
-getMonitorList(const Napi::CallbackInfo& info)
+Napi::Array getMonitorList(const Napi::CallbackInfo& info)
 {
     Napi::Env env = info.Env();
+    try {
+        populateHandlesMap();
+    } catch (std::runtime_error& e) {
+        throw Napi::Error::New(env, e.what());
+    }
+
     Napi::Array ret = Napi::Array::New(env, handles.size());
 
     int i = 0;
@@ -208,18 +210,21 @@ getMonitorList(const Napi::CallbackInfo& info)
     return ret;
 }
 
-Napi::Number
-getNumberAdapters(const Napi::CallbackInfo& info)
+Napi::Number getNumberAdapters(const Napi::CallbackInfo& info)
 {
     Napi::Env env = info.Env();
+    try {
+        populateHandlesMap();
+    } catch (std::runtime_error& e) {
+        throw Napi::Error::New(env, e.what());
+    }
     Napi::Number ret = Napi::Number::New(env, adapters.size());
 
     return ret;
 }
 
 
-Napi::Value
-setVCP(const Napi::CallbackInfo& info)
+Napi::Value setVCP(const Napi::CallbackInfo& info)
 {
     Napi::Env env = info.Env();
 
@@ -249,8 +254,7 @@ setVCP(const Napi::CallbackInfo& info)
     return env.Undefined();
 }
 
-Napi::Value
-getVCP(const Napi::CallbackInfo& info)
+Napi::Value getVCP(const Napi::CallbackInfo& info)
 {
     Napi::Env env = info.Env();
 
@@ -285,8 +289,7 @@ getVCP(const Napi::CallbackInfo& info)
     return ret;
 }
 
-Napi::Object
-Init(Napi::Env env, Napi::Object exports)
+Napi::Object Init(Napi::Env env, Napi::Object exports)
 {
     exports.Set("getMonitorList",
                 Napi::Function::New(env, getMonitorList, "getMonitorList"));
@@ -295,12 +298,6 @@ Init(Napi::Env env, Napi::Object exports)
     exports.Set("refresh", Napi::Function::New(env, refresh, "refresh"));
     exports.Set("setVCP", Napi::Function::New(env, setVCP, "setVCP"));
     exports.Set("getVCP", Napi::Function::New(env, getVCP, "getVCP"));
-
-    try {
-        populateHandlesMap();
-    } catch (std::runtime_error& e) {
-        throw Napi::Error::New(env, e.what());
-    }
 
     return exports;
 }

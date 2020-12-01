@@ -12,11 +12,13 @@ yarn add https://github.com/bad-panda/gyg-display-node-module.git
 ## Usage
 
 ````js
-const ddcci = require("@hensm/ddcci");
+const ddcci = require("@gifyourgame/ddcci");
 
 for (const monitor of ddcci.getMonitorList()) {
     console.log(`${monitor}`);
 }
+
+console.log(`${ddcci.getNumberAdapters()}`)
 ````
 
 ## Docs
